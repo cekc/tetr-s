@@ -3,37 +3,37 @@ from tkinter import messagebox
 from random import shuffle, choice, getrandbits
 from time import monotonic
 
-COLORS = ['#07B978', '#C95710', '#6E7188', '#C04FDA', '#0F5FD0',
-          '#7CC30A', '#F72B39']
+COLORS = [
+    "#07B978",
+    "#C95710",
+    "#6E7188",
+    "#C04FDA",
+    "#0F5FD0",
+    "#7CC30A",
+    "#F72B39",
+]
 shuffle(COLORS)
 
-class Game(tk.Frame):
 
+class Game(tk.Frame):
     def __init__(self, master):
         super().__init__(master)
         self.grid()
 
-        self.master.protocol('WM_DELETE_WINDOW', self.abandon)
+        self.master.protocol("WM_DELETE_WINDOW", self.abandon)
 
         self.canvas = tk.Canvas(self, width=200, height=400)
         self.canvas.grid(row=0, column=0)
 
-        #self.sidebar = tk.Frame(self, width=200, height=400)
-        #self.sidebar.grid(row=0, column=1)
+        print(self.master.geometry("204x404+400+100"))
 
-        #self.scorelabel = tk.Label(self.sidebar, text='Score: 0')
-        #self.scorelabel.grid(row=0, column=1, sticky=tk.N)
-
-        print(self.master.geometry('204x404+400+100'))
-
-        #self.master.bind('<space>', self.instantfall)
-        self.speedup = HoldReleaseHandler(self.master, 'Down')
-        self.movingleft = HoldReleaseHandler(self.master, 'Left')
-        self.movingright = HoldReleaseHandler(self.master, 'Right')
-        self.rotating = HoldReleaseHandler(self.master, 'Up')
-        self.double_rot = HoldReleaseHandler(self.master, 'Shift_L')
-        self.counter_rot = HoldReleaseHandler(self.master, 'Control_L')
-        self.master.bind('<Escape>', self.pause)
+        self.speedup = HoldReleaseHandler(self.master, "Down")
+        self.movingleft = HoldReleaseHandler(self.master, "Left")
+        self.movingright = HoldReleaseHandler(self.master, "Right")
+        self.rotating = HoldReleaseHandler(self.master, "Up")
+        self.double_rot = HoldReleaseHandler(self.master, "Shift_L")
+        self.counter_rot = HoldReleaseHandler(self.master, "Control_L")
+        self.master.bind("<Escape>", self.pause)
 
         self.timequant = 0.025
         self.speedfactor = 20
@@ -81,16 +81,16 @@ class Game(tk.Frame):
                         if t.y >= 20:
                             self.gameover()
                         self.solidtiles[t.x, t.y] = t
-                    self.canvas.dtag('piece', 'piece')
+                    self.canvas.dtag("piece", "piece")
                     self.clearlines(self.piece.y, self.piece.boxsize)
                     self.piece = Tetramino.spawn(self.canvas)
                     lockdelay = -1
                 elif lockdelay < 0:
                     lockdelay = self.speedfactor
-                    
+
             if self.movingleft.pressed:
                 self.movingleft.pressed = False
-                leftcooldown =self.presshold_cooldown 
+                leftcooldown = self.presshold_cooldown
                 self.move(-1, 0)
             elif not leftcooldown and self.movingleft.held:
                 self.move(-1, 0)
@@ -101,7 +101,7 @@ class Game(tk.Frame):
                 self.move(1, 0)
             elif not rightcooldown and self.movingright.held:
                 self.move(1, 0)
-                
+
             if self.rotating.pressed:
                 self.rotating.pressed = False
                 if self.double_rot.held:
@@ -113,17 +113,14 @@ class Game(tk.Frame):
                         if self.rotate(i):
                             break
 
-            #self.master.update()
             while self.lines_cleared >= self.levelup_lines:
                 self.level += 1
                 self.speedfactor -= 1
                 self.levelup_lines = self.level * (self.level + 1) * 2
                 if self.level >= 15:
-                    self.levelup_lines = float('inf')
+                    self.levelup_lines = float("inf")
 
-            #self.scorelabel['text'] = 'Score: ' + str(self.score)
             self.wait()
-
 
     def move(self, x, y):
         will_occupy = self.piece.points(x, y)
@@ -135,7 +132,7 @@ class Game(tk.Frame):
             t.y += y
         self.piece.x += x
         self.piece.y += y
-        self.canvas.move('piece', 20*x, -20*y)
+        self.canvas.move("piece", 20 * x, -20 * y)
         return True
 
     def rotate(self, angle=1):
@@ -151,15 +148,14 @@ class Game(tk.Frame):
             if can_rotate:
                 self.piece.x += wkick[0]
                 self.piece.y += wkick[1]
-                self.piece.angle = (self.piece.angle + angle) \
-                                   % self.piece.rot_order
-                self.canvas.delete('piece')
+                self.piece.angle = (
+                    self.piece.angle + angle
+                ) % self.piece.rot_order
+                self.canvas.delete("piece")
                 self.piece.draw()
                 return True
         return False
-                
-        
-        
+
     def clearlines(self, y0=0, delta=20):
         filled = []
         for y in reversed(range(y0, y0 + delta)):
@@ -170,17 +166,14 @@ class Game(tk.Frame):
             for y in filled:
                 self.canvas.delete(self.solidtiles[x, y].rectangle)
                 for y1 in range(y + 1, 20):
-                    self.solidtiles[x, y1-1] = self.solidtiles.get((x, y1))
-            #self.master.update()
-            self.score += 10*len(filled)*(len(filled)+1)
-            #self.scorelabel['text'] = 'Score: ' + str(self.score)
+                    self.solidtiles[x, y1 - 1] = self.solidtiles.get((x, y1))
+            self.score += 10 * len(filled) * (len(filled) + 1)
             self.wait()
 
         for y in filled:
-            self.canvas.addtag_enclosed('move', 3, 3, 201, 381-20*y)
-            self.canvas.move('move', 0, 20)
-            self.canvas.dtag('move', 'move')
-            #self.master.update()
+            self.canvas.addtag_enclosed("move", 3, 3, 201, 381 - 20 * y)
+            self.canvas.move("move", 0, 20)
+            self.canvas.dtag("move", "move")
             self.wait()
 
         self.lines_cleared += len(filled)
@@ -189,7 +182,7 @@ class Game(tk.Frame):
             self.speedfactor -= 1
             self.levelup_lines += self.level * 3
             if self.level >= 15:
-                self.levelup_lines = float('inf')
+                self.levelup_lines = float("inf")
 
     def instantfall(self, event=None):
         pass
@@ -197,13 +190,12 @@ class Game(tk.Frame):
     def pause(self, event=None):
         self.paused ^= 1
         if self.paused:
-            self.canvas.addtag_all('all')
-            self.canvas.itemconfigure('all', stipple='gray50')
+            self.canvas.addtag_all("all")
+            self.canvas.itemconfigure("all", stipple="gray50")
         else:
-            self.canvas.itemconfigure('all', stipple='')
-            self.canvas.dtag('all', 'all')
+            self.canvas.itemconfigure("all", stipple="")
+            self.canvas.dtag("all", "all")
             self.waittime = monotonic()
-            
 
     def wait(self):
         self.master.update()
@@ -211,7 +203,6 @@ class Game(tk.Frame):
         while self.paused:
             self.master.update()
             self.wait_quant()
-        
 
     def wait_quant(self):
         self.waittime += self.timequant
@@ -221,7 +212,7 @@ class Game(tk.Frame):
     def abandon(self):
         self.paused = False
         self.pause()
-        if messagebox.askyesno('Abandon', 'Do you really want to quit?'): 
+        if messagebox.askyesno("Abandon", "Do you really want to quit?"):
             try:
                 self.master.destroy()
             except:
@@ -233,21 +224,25 @@ class Game(tk.Frame):
 
 
 class Tile:
-    def __init__(self, x, y, canvas, tag=None, color='', fillpattern=''):
+    def __init__(self, x, y, canvas, tag=None, color="", fillpattern=""):
         self.x = x
         self.y = y
-        #self.color = color
-        #self.canvas = canvas
         self.rectangle = canvas.create_rectangle(
-            3+20*x, 383-20*y, 21+20*x, 401-20*y, fill=color, width=0,
-            stipple=fillpattern)
+            3 + 20 * x,
+            383 - 20 * y,
+            21 + 20 * x,
+            401 - 20 * y,
+            fill=color,
+            width=0,
+            stipple=fillpattern,
+        )
         if not tag is None:
             canvas.addtag_withtag(tag, self.rectangle)
 
 
-class Tetramino: 
+class Tetramino:
     def __init__(self, canvas, angle, x, y, appear):
-        if self.__class__.__name__ == 'Tetramino':
+        if self.__class__.__name__ == "Tetramino":
             raise TypeError
         self.canvas = canvas
         self.angle = angle % self.rot_order
@@ -255,26 +250,26 @@ class Tetramino:
         self.y = y
         if appear:
             self.draw()
-            
 
     def clone(self, x=0, y=0, angle=0, appear=False, relative=True):
         if relative:
             x += self.x
             y += self.y
-        return type(self)(
-            self.canvas, self.angle+angle, x, y, appear)
+        return type(self)(self.canvas, self.angle + angle, x, y, appear)
 
     def points(self, x=0, y=0, angle=0):
-        return ((self.x + x1 + x, self.y + y1 + y)
-                for x1, y1 in
-                self.bodies[(self.angle + angle) % self.rot_order])
+        return (
+            (self.x + x1 + x, self.y + y1 + y)
+            for x1, y1 in self.bodies[(self.angle + angle) % self.rot_order]
+        )
 
     def draw(self, color=None):
         if color is None:
             color = self.color
         self.tiles = [
-            Tile(self.x + x1, self.y + y1, self.canvas, 'piece', color)
-            for x1, y1 in self.bodies[self.angle] ]
+            Tile(self.x + x1, self.y + y1, self.canvas, "piece", color)
+            for x1, y1 in self.bodies[self.angle]
+        ]
 
     def wkicks_list(self):
         return self.wallkicks[self.angle]
@@ -284,141 +279,157 @@ class Tetramino:
         if cls == Tetramino:
             cls = choice(Tetramino.__subclasses__())
 
-        return cls(canvas, getrandbits(2),
-                     x + cls.spawnoffset_x, y + cls.spawnoffset_y)
-        
+        return cls(
+            canvas,
+            getrandbits(2),
+            x + cls.spawnoffset_x,
+            y + cls.spawnoffset_y,
+        )
+
 
 class I(Tetramino):
     bodies = (
         ((0, 1), (1, 1), (2, 1), (3, 1)),
         ((1, 0), (1, 1), (1, 2), (1, 3))
-        )
+    )
     wallkicks = (
         ((0, 0),),
         ((0, 0), (-1, 0), (1, 0), (-2, 0))
-        )
+    )
     boxsize = 4
     spawnoffset_x, spawnoffset_y = (0, 0)
     rot_order = 2
     color = COLORS[0]
+
     def __init__(self, canvas, angle, x=0, y=0, appear=True):
-        Tetramino.__init__(self, canvas, angle, x, y, appear)
+        super().__init__(canvas, angle, x, y, appear)
+
 
 class O(Tetramino):
-    bodies = (
-        ((0, 0), (1, 0), (0, 1), (1, 1)), 
-        )
+    bodies = (((0, 0), (1, 0), (0, 1), (1, 1)),)
     wallkicks = (((0, 0),),)
     boxsize = 2
     spawnoffset_x, spawnoffset_y = (1, 0)
     rot_order = 1
     color = COLORS[1]
+
     def __init__(self, canvas, angle, x=0, y=0, appear=True):
-        Tetramino.__init__(self, canvas, angle, x, y, appear)
+        super().__init__(canvas, angle, x, y, appear)
+
 
 class L(Tetramino):
     bodies = (
         ((1, 0), (2, 0), (1, 1), (1, 2)),
         ((0, 0), (1, 0), (2, 0), (2, 1)),
         ((0, 2), (1, 0), (1, 1), (1, 2)),
-        ((0, 0), (0, 1), (1, 1), (2, 1))
-        )
+        ((0, 0), (0, 1), (1, 1), (2, 1)),
+    )
     wallkicks = (
         ((0, 0), (1, 0)),
         ((0, 0),),
         ((0, 0), (-1, 0)),
         ((0, 0),)
-        )
+    )
     boxsize = 3
     spawnoffset_x, spawnoffset_y = (0, 0)
     rot_order = 4
     color = COLORS[2]
+
     def __init__(self, canvas, angle, x=0, y=0, appear=True):
-        Tetramino.__init__(self, canvas, angle, x, y, appear)
-            
+        super().__init__(canvas, angle, x, y, appear)
+
+
 class J(Tetramino):
     bodies = (
         ((0, 0), (1, 0), (1, 1), (1, 2)),
         ((0, 0), (0, 1), (1, 0), (2, 0)),
         ((1, 0), (1, 1), (1, 2), (2, 2)),
-        ((0, 1), (1, 1), (2, 0), (2, 1))
-        )
+        ((0, 1), (1, 1), (2, 0), (2, 1)),
+    )
     wallkicks = (
         ((0, 0), (-1, 0)),
         ((0, 0),),
         ((0, 0), (1, 0)),
         ((0, 0),)
-        )
+    )
     boxsize = 3
     spawnoffset_x, spawnoffset_y = (1, 0)
     rot_order = 4
     color = COLORS[3]
+
     def __init__(self, canvas, angle, x=0, y=0, appear=True):
-        Tetramino.__init__(self, canvas, angle, x, y, appear)
+        super().__init__(canvas, angle, x, y, appear)
+
 
 class T(Tetramino):
     bodies = (
         ((0, 1), (1, 0), (1, 1), (2, 1)),
         ((1, 0), (1, 1), (1, 2), (2, 1)),
         ((0, 0), (1, 0), (1, 1), (2, 0)),
-        ((0, 1), (1, 0), (1, 1), (1, 2))
-        )
+        ((0, 1), (1, 0), (1, 1), (1, 2)),
+    )
     wallkicks = (
         ((0, 0),),
         ((0, 0), (1, 0)),
         ((0, 0),),
         ((0, 0), (-1, 0))
-        )
+    )
     boxsize = 3
     spawnoffset_x, spawnoffset_y = (0, 0)
     rot_order = 4
     color = COLORS[4]
+
     def __init__(self, canvas, angle, x=0, y=0, appear=True):
-        Tetramino.__init__(self, canvas, angle, x, y, appear)
+        super().__init__(canvas, angle, x, y, appear)
+
 
 class S(Tetramino):
     bodies = (
         ((0, 1), (0, 2), (1, 0), (1, 1)),
         ((0, 0), (1, 0), (1, 1), (2, 1))
-        )
+    )
     boxsize = 3
     wallkicks = (
         ((0, 0), (-1, 0)),
         ((0, 0),)
-        )
+    )
     spawnoffset_x, spawnoffset_y = (1, 0)
     rot_order = 2
     color = COLORS[5]
+
     def __init__(self, canvas, angle, x=0, y=0, appear=True):
-        Tetramino.__init__(self, canvas, angle, x, y, appear)
+        super().__init__(canvas, angle, x, y, appear)
+
 
 class Z(Tetramino):
     bodies = (
         ((1, 0), (1, 1), (2, 1), (2, 2)),
         ((0, 1), (1, 0), (1, 1), (2, 0))
-        )
+    )
     wallkicks = (
         ((0, 0), (1, 0)),
         ((0, 0),)
-        )
+    )
     boxsize = 3
     spawnoffset_x, spawnoffset_y = (0, 0)
     rot_order = 2
     color = COLORS[6]
+
     def __init__(self, canvas, angle, x=0, y=0, appear=True):
-        Tetramino.__init__(self, canvas, angle, x, y, appear)
-            
+        super().__init__(canvas, angle, x, y, appear)
+
 
 class HoldReleaseHandler:
     def __init__(self, widget, keysym):
         self.held = False
         self.pressed = False
         self.widget = widget
-        self.press_str = '<KeyPress-' + keysym + '>'
-        self.release_str = '<KeyRelease-' + keysym + '>'
-        self.hh_id = self.widget.bind(self.press_str, self.hold_handler, '+')
-        self.rh_id = self.widget.bind(self.release_str, self.release_handler,
-                                      '+')
+        self.press_str = "<KeyPress-" + keysym + ">"
+        self.release_str = "<KeyRelease-" + keysym + ">"
+        self.hh_id = self.widget.bind(self.press_str, self.hold_handler, "+")
+        self.rh_id = self.widget.bind(
+            self.release_str, self.release_handler, "+"
+        )
 
     def hold_handler(self, event=None):
         self.held = True
@@ -427,19 +438,20 @@ class HoldReleaseHandler:
 
     def release_handler(self, event=None):
         self.held = False
-        self.hh_id = self.widget.bind(self.press_str, self.hold_handler, '+')
+        self.hh_id = self.widget.bind(self.press_str, self.hold_handler, "+")
 
     def __del__(self):
         self.widget.unbind(self.press_str, self.hh_id)
         self.widget.unbind(self.release_str, self.rh_id)
-        
-    
-def start_app():    
+
+
+def start_app():
     root = tk.Tk()
     root.title("Who cares 'bout name")
     root.resizable(False, False)
     app = Game(master=root)
     app.mainloop()
 
-if __name__=='__main__':
+
+if __name__ == "__main__":
     start_app()

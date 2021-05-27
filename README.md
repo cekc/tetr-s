@@ -10,5 +10,5 @@ sudo apt-get install python3-tk
 
 ## Controls
 
-`ESC` to pause, `UP` to rotate clockwise, Left `Ctrl+UP` to rotate CCW,
+`ESC` to pause, `UP` to rotate clockwise, `Left Ctrl+UP` to rotate CCW,
 `Left Shift+UP` to rotate by 180°, `DOWN` to speed up falling, `LEFT`/`RIGHT` to move.
